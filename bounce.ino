@@ -20,13 +20,9 @@ npBouncingBall bballs[NSTRIPES] = {npBouncingBall(50,vNeo1),npBouncingBall(60,vN
                                     npBouncingBall(40,vNeo3),npBouncingBall(20,vNeo4)};
 
 float accel[3] = {0,0,0};
-float accel_old[3] = {0,0,0};
-float diff[3] = {0,0,0};
 byte *c;
-float Motion_Theshold = 0.02;
-uint32_t time_old;
-
-uint16_t errorsAndWarnings = 0;
+// in Gs, 1 is base
+float Motion_Theshold = 2;
 
 //Create instance of LSM6DS3Core
 LSM6DS3 myIMU(I2C_MODE, 0x6A);    //I2C device address 0x6A
@@ -39,7 +35,7 @@ void setup() {
     pixels.npShow();
 
     //Init Serial port
-    Serial.begin(9600);
+    // Serial.begin(9600);
     // while (!Serial);
 
     //Call .beginCore() to configure the IMU
@@ -48,20 +44,10 @@ void setup() {
     } else {
         Serial.print("\nDevice OK.\n");
     }
-
-    time_old = micros();
 }
 
 void loop() {
-    uint32_t time;
-    float delta;
-    float diffsum;
-    float diff_ps;
-
-    time = micros();
-    delta = (float)(time - time_old) / 1000000.0;
-    time_old = time;
-
+    float accel_sum;
     //   // turn the LED on (HIGH is the voltage level)
     // digitalWrite(LED_BUILTIN, HIGH);
     // // // wait for a second
@@ -76,19 +62,11 @@ void loop() {
     accel[1] = myIMU.readFloatAccelY();
     accel[2] = myIMU.readFloatAccelZ();
 
-    diff[0] = abs(accel[0] - accel_old[0]);
-    diff[1] = abs(accel[1] - accel_old[1]);
-    diff[2] = abs(accel[2] - accel_old[2]);
- 
-    accel_old[0] = accel[0]; accel_old[1] = accel[1]; accel_old[2] = accel[2];
-    diffsum = diff[0] + diff[1] + diff[2];
-    diff_ps = diffsum * delta;
-    Serial.print(" delta = ");
-    Serial.println(diff_ps, 4);
+    accel_sum = sqrt(accel[0]*accel[0] + accel[1]*accel[1] + accel[2]*accel[2]);
 
     for(int i=0;i<NSTRIPES;i++) bballs[i].update();
 
-    if (bballs[3].hasFinished() && (diff_ps>Motion_Theshold))
+    if (bballs[3].hasFinished() && (accel_sum>Motion_Theshold))
     {
         c=Wheel(random(0,255));
 
