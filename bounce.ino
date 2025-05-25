@@ -3,7 +3,7 @@
 #include "SPI.h"
 #include <Adafruit_NeoPixel.h>
 #include <npNeoPixel.h>
-#include <npBouncingBall.h>
+#include <npVirtualNeo.h>
 
 #define NeoPin     A0 // NeoPixel Pin
 #define MAXPIXELS 52 // Number of Pixels
@@ -16,16 +16,7 @@ npVirtualNeo vNeo2(&pixels, 13, 25);
 npVirtualNeo vNeo3(&pixels, 38, 26);
 npVirtualNeo vNeo4(&pixels, 39, 51);
 
-npBouncingBall bballs[NSTRIPES] = {npBouncingBall(50,vNeo1),npBouncingBall(60,vNeo2),
-                                    npBouncingBall(40,vNeo3),npBouncingBall(20,vNeo4)};
-
-float accel[3] = {0,0,0};
-byte *c;
-// in Gs, 1 is base
-float Motion_Theshold = 2;
-
-//Create instance of LSM6DS3Core
-LSM6DS3 myIMU(I2C_MODE, 0x6A);    //I2C device address 0x6A
+uint effectId = 0;
 
 void setup() {
     pinMode(LED_BUILTIN, OUTPUT);
@@ -35,71 +26,24 @@ void setup() {
     pixels.npShow();
 
     //Init Serial port
-    // Serial.begin(9600);
-    // while (!Serial);
+    Serial.begin(9600);
+    while (!Serial);
 
-    //Call .beginCore() to configure the IMU
-    if (myIMU.begin() != 0) {
-        Serial.print("\nDevice Error.\n");
-    } else {
-        Serial.print("\nDevice OK.\n");
-    }
+    setup_bounce();
+    setup_bluetooth();
 }
 
 void loop() {
-    float accel_sum;
-    //   // turn the LED on (HIGH is the voltage level)
-    // digitalWrite(LED_BUILTIN, HIGH);
-    // // // wait for a second
-    // delay(25);
-    // // // turn the LED off by making the voltage LOW
-    // digitalWrite(LED_BUILTIN, LOW);
-
-    // delay(25);
-
-    //Accelerometer
-    accel[0] = myIMU.readFloatAccelX();
-    accel[1] = myIMU.readFloatAccelY();
-    accel[2] = myIMU.readFloatAccelZ();
-
-    accel_sum = sqrt(accel[0]*accel[0] + accel[1]*accel[1] + accel[2]*accel[2]);
-
-    for(int i=0;i<NSTRIPES;i++) bballs[i].update();
-
-    if (bballs[3].hasFinished() && (accel_sum>Motion_Theshold))
-    {
-        c=Wheel(random(0,255));
-
-        for(int i=0;i<NSTRIPES;i++) 
-        {
-            //uncomment following line for fixed collor for the balls
-            //and the upper line c=Wheel... 
-            bballs[i].changeColor(*c, *(c+1), *(c+2));
-            bballs[i].restart();
-        }
+    if (effectId == 0) {
+        run_bounce();
+    } else if (effectId == 1) {
+        run_meteor();
     }
-
-    delay(5);
 }
 
-byte * Wheel(byte WheelPos) {
-  static byte c[3];
- 
-  if(WheelPos < 85) {
-   c[0]=WheelPos * 3;
-   c[1]=255 - WheelPos * 3;
-   c[2]=0;
-  } else if(WheelPos < 170) {
-   WheelPos -= 85;
-   c[0]=255 - WheelPos * 3;
-   c[1]=0;
-   c[2]=WheelPos * 3;
-  } else {
-   WheelPos -= 170;
-   c[0]=0;
-   c[1]=WheelPos * 3;
-   c[2]=255 - WheelPos * 3;
-  }
+void bleuart_receive(char* str) {
+    effectId = (effectId+1)%2;
 
-  return c;
+    pixels.clear();
+    pixels.npShow();
 }
