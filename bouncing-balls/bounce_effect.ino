@@ -1,28 +1,41 @@
 #include <npNeoPixel.h>
-#include <npBouncingBall.h>
+#include "src/npBouncingBallCustom.h"
 
-npBouncingBall bballs[NSTRIPES] = {npBouncingBall(50,vNeo1),npBouncingBall(60,vNeo2),
-                                    npBouncingBall(40,vNeo3),npBouncingBall(20,vNeo4)};
+npBouncingBallCustom bballs[NSTRIPES] = {
+    npBouncingBallCustom(50, vNeo1, false),
+    npBouncingBallCustom(10, vNeo2, false),
+    npBouncingBallCustom(40, vNeo3, false),
+    npBouncingBallCustom(20, vNeo4, false),
+    npBouncingBallCustom(30, vNeo5, false),
+    npBouncingBallCustom(80, vNeo6, false),
+    npBouncingBallCustom(20, vNeo7, false),
+    npBouncingBallCustom(10, vNeo8, false),
+    npBouncingBallCustom(70, vNeo9, false),
+    npBouncingBallCustom(30, vNeo10, false),
+    npBouncingBallCustom(10, vNeo11, false),
+    npBouncingBallCustom(40, vNeo12, false),
+    npBouncingBallCustom(80, vNeo13, false),
+    npBouncingBallCustom(10, vNeo14, false),
+    npBouncingBallCustom(20, vNeo15, false),
+    npBouncingBallCustom(60, vNeo16, false),
+    npBouncingBallCustom(20, vNeo17, false),
+    npBouncingBallCustom(50, vNeo18, false),
+    npBouncingBallCustom(30, vNeo19, false),
+};
 
-float accel[3] = {0,0,0};
 byte *cb;
 // in Gs, 1 is base
-float Motion_Theshold = 2;
+float Motion_Theshold_Sq = pow(2.75, 2);
 
-//Create instance of LSM6DS3Core
-LSM6DS3 myIMU(I2C_MODE, 0x6A);    //I2C device address 0x6A
-
-void setup_bounce() {
-    //Call .beginCore() to configure the IMU
-    if (myIMU.begin() != 0) {
-        Serial.print("\nDevice Error.\n");
-    } else {
-        Serial.print("\nDevice OK.\n");
+void restart_bounce() {
+    pixels.setBrightness(255);
+    for(int i=0;i<NSTRIPES;i++) { 
+        bballs[i].restart();
     }
 }
 
 void run_bounce() {
-    float accel_sum;
+    bool update = false;
     //   // turn the LED on (HIGH is the voltage level)
     // digitalWrite(LED_BUILTIN, HIGH);
     // // // wait for a second
@@ -32,16 +45,12 @@ void run_bounce() {
 
     // delay(25);
 
-    //Accelerometer
-    accel[0] = myIMU.readFloatAccelX();
-    accel[1] = myIMU.readFloatAccelY();
-    accel[2] = myIMU.readFloatAccelZ();
+    for(int i=0;i<NSTRIPES;i++) { 
+        bool didUpdate = bballs[i].update();
+        update = update || didUpdate;
+    };
 
-    accel_sum = sqrt(accel[0]*accel[0] + accel[1]*accel[1] + accel[2]*accel[2]);
-
-    for(int i=0;i<NSTRIPES;i++) bballs[i].update();
-
-    if (bballs[3].hasFinished() && (accel_sum>Motion_Theshold))
+    if (bballs[1].hasFinished() && (accel_sum_sq>Motion_Theshold_Sq))
     {
         cb=Wheel(random(0,255));
 
@@ -54,5 +63,8 @@ void run_bounce() {
         }
     }
 
-    delay(5);
+    if (update)
+    pixels.npShow();
+
+    //delay(5);
 }
