@@ -6,49 +6,15 @@
 #include <npVirtualNeo.h>
 
 #define NeoPin     A0 // NeoPixel Pin
-#define MAXPIXELS 285 // Number of Pixels
-#define NSTRIPES 19 //Number of Stripes 
-#define NSTRIPES_HOR 15
+#define MAXPIXELS 190 // Number of Pixels
+#define NSTRIPES 10 //Number of Stripes 
+#define NSTRIPES_HOR 19
 
 npNeoPixel pixels = npNeoPixel(MAXPIXELS, NeoPin, NEO_GRB + NEO_KHZ800, 8.0);
 
-npVirtualNeo vNeo1(&pixels, 0, 14);
-npVirtualNeo vNeo2(&pixels, 29, 15);
-npVirtualNeo vNeo3(&pixels, 30, 44);
-npVirtualNeo vNeo4(&pixels, 59, 45);
-npVirtualNeo vNeo5(&pixels, 60, 74);
-npVirtualNeo vNeo6(&pixels, 89, 75);
-npVirtualNeo vNeo7(&pixels, 90, 104);
-npVirtualNeo vNeo8(&pixels, 119, 105);
-npVirtualNeo vNeo9(&pixels, 120, 134);
-npVirtualNeo vNeo10(&pixels, 149, 135);
-npVirtualNeo vNeo11(&pixels, 150, 164);
-npVirtualNeo vNeo12(&pixels, 179, 165);
-npVirtualNeo vNeo13(&pixels, 180, 194);
-npVirtualNeo vNeo14(&pixels, 209, 195);
-npVirtualNeo vNeo15(&pixels, 210, 224);
-npVirtualNeo vNeo16(&pixels, 239, 225);
-npVirtualNeo vNeo17(&pixels, 240, 254);
-npVirtualNeo vNeo18(&pixels, 269, 255);
-npVirtualNeo vNeo19(&pixels, 270, 284);
-
-npVirtualNeo vNeoHor1(&pixels, 0, 270, 15);
-npVirtualNeo vNeoHor2(&pixels, 1, 271, 15);
-npVirtualNeo vNeoHor3(&pixels, 2, 272, 15);
-npVirtualNeo vNeoHor4(&pixels, 3, 273, 15);
-npVirtualNeo vNeoHor5(&pixels, 4, 274, 15);
-npVirtualNeo vNeoHor6(&pixels, 5, 275, 15);
-npVirtualNeo vNeoHor7(&pixels, 6, 276, 15);
-npVirtualNeo vNeoHor8(&pixels, 7, 277, 15);
-npVirtualNeo vNeoHor9(&pixels, 8, 278, 15);
-npVirtualNeo vNeoHor10(&pixels, 9, 279, 15);
-npVirtualNeo vNeoHor11(&pixels, 10, 280, 15);
-npVirtualNeo vNeoHor12(&pixels, 11, 281, 15);
-npVirtualNeo vNeoHor13(&pixels, 12, 282, 15);
-npVirtualNeo vNeoHor14(&pixels, 13, 283, 15);
-npVirtualNeo vNeoHor15(&pixels, 14, 284, 15);
-
-npVirtualNeo vNeoFull(&pixels, 0, 284);
+npVirtualNeo* vNeoVert[NSTRIPES] = {0};
+npVirtualNeo* vNeoHor[NSTRIPES_HOR] = {0};
+npVirtualNeo vNeoFull(&pixels, 0, MAXPIXELS-1);
 
 //Create instance of LSM6DS3Core
 LSM6DS3 myIMU(I2C_MODE, 0x6A);    //I2C device address 0x6A
@@ -70,6 +36,13 @@ float Max_Gyro_Sq = pow(140, 2);
 #define EFFECT_DURATION 5000
 
 void setup() {
+    for (int i = 0; i < NSTRIPES; i++) {
+        vNeoVert[i] = new npVirtualNeo(&pixels, i%2 == 1 ? i*NSTRIPES_HOR : (i+1)*NSTRIPES_HOR - 1, i%2 == 1 ? (i+1)*NSTRIPES_HOR - 1 : i*NSTRIPES_HOR);
+    }
+    for (int i = 0; i < NSTRIPES_HOR; i++) {
+        vNeoHor[i] = new npVirtualNeo(&pixels, i, MAXPIXELS - NSTRIPES + i, NSTRIPES);
+    }
+
     pinMode(LED_BUILTIN, OUTPUT);
 
     pixels.begin();
@@ -87,6 +60,8 @@ void setup() {
         Serial.print("\nDevice OK.\n");
     }
 
+    setup_bounce();
+    setup_line();
     //setup_bluetooth();
 }
 
