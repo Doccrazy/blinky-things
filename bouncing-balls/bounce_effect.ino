@@ -36,18 +36,18 @@ void run_bounce() {
         update = update || didUpdate;
     };
 
-    if (bballs[1]->hasFinished() && (accel_sum_sq>Motion_Theshold_Sq))
-    {
-        cb=Wheel(random(0,255));
+    // if (bballs[1]->hasFinished() && (accel_sum_sq>Motion_Theshold_Sq))
+    // {
+    //     cb=Wheel(random(0,255));
 
-        for(int i=0;i<NSTRIPES;i++) 
-        {
-            //uncomment following line for fixed collor for the balls
-            //and the upper line c=Wheel... 
-            bballs[i]->changeColor(*cb, *(cb+1), *(cb+2));
-            bballs[i]->restart();
-        }
-    }
+    //     for(int i=0;i<NSTRIPES;i++) 
+    //     {
+    //         //uncomment following line for fixed collor for the balls
+    //         //and the upper line c=Wheel... 
+    //         bballs[i]->changeColor(*cb, *(cb+1), *(cb+2));
+    //         bballs[i]->restart();
+    //     }
+    // }
 
     if (update)
     pixels.npShow();

@@ -1,10 +1,10 @@
 #include <npRainbow.h>
 
-npRainbow rainbow(10, vNeoFull, true);
+npRainbow rainbow(10, vNeoFull);
 
 uint brightness = 0;
 
-#define MAX_RAINBOW_BRIGHTNESS 64
+#define MAX_RAINBOW_BRIGHTNESS 32
 
 void restart_rainbow() {
   pixels.setBrightness(0);

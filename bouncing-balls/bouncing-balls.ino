@@ -24,12 +24,12 @@ float accel_sum_sq;
 float gyro_sum_sq;
 float gyro_avg = 0.0f;
 float gyro_avg2[3] = {0,0,0};
-#define GYRO_WINDOW 50
+#define GYRO_WINDOW 75
 
 uint effectId = 0;
 uint32_t t, tLock = 0;
 
-float Motion_Switch_Theshold_Sq = pow(3.25, 2);
+float Motion_Switch_Theshold_Sq = pow(3.5, 2);
 float Gyro_Switch_Theshold_Sq = pow(130, 2);
 float Max_Gyro_Sq = pow(140, 2);
 
@@ -40,7 +40,7 @@ void setup() {
         vNeoVert[i] = new npVirtualNeo(&pixels, i%2 == 1 ? i*NSTRIPES_HOR : (i+1)*NSTRIPES_HOR - 1, i%2 == 1 ? (i+1)*NSTRIPES_HOR - 1 : i*NSTRIPES_HOR);
     }
     for (int i = 0; i < NSTRIPES_HOR; i++) {
-        vNeoHor[i] = new npVirtualNeo(&pixels, i, MAXPIXELS - NSTRIPES + i, NSTRIPES);
+        vNeoHor[i] = new npVirtualNeo(&pixels, i, MAXPIXELS - NSTRIPES + i, NSTRIPES_HOR);
     }
 
     pinMode(LED_BUILTIN, OUTPUT);
